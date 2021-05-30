@@ -1,3 +1,4 @@
-res/word-vector/*
+*.bz2
+*.ipynb
+*.hdf5
 /test/*
-*ipynb
