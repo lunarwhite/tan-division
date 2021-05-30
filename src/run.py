@@ -129,7 +129,7 @@ print('\npart-E: 数据预处理-填充与裁剪')
 train_pad = pad_sequences(train_tokens, maxlen=mid_tokens, padding='pre', truncating='pre')
 
 # 超出五万个词向量的词用0代替
-train_pad[ train_pad>=num_words ] = 0
+train_pad[train_pad>=num_words] = 0
 
 train_pad[33] # padding之后前面的tokens全变成0，文本在最后面
 
@@ -191,7 +191,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceL
 print('\npart-G: 调试')
 
 # 建立一个权重的存储点，保存训练中的最好模型
-path_checkpoint = 'src\\RNN\\RNN_weights.hdf5'
+path_checkpoint = 'tmp\\weights.hdf5'
 checkpointer = ModelCheckpoint(filepath=path_checkpoint, monitor='val_loss' , verbose=1 , save_weights_only=True , save_best_only=True)
 
 # 尝试加载已训练模型
