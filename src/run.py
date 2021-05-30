@@ -1,4 +1,14 @@
 '''
+part-0: 调整超参数
+'''
+my_loss = 'binary_crossentropy'
+my_lr = 1e-3
+my_test_size = 0.1
+my_validation_split = 0.1
+my_epochs = 20
+my_batch_size = 128
+
+'''
 part-A: 数据探索
 '''
 import os
@@ -10,8 +20,8 @@ print('\npart-A: 数据探索')
 pos_txts = os.listdir('res\\datanew\\pos')
 neg_txts = os.listdir('res\\datanew\\neg')
 
-print('num of pos: {0}'.format(len(pos_txts))) # pos样本个数 2000
-print('num of neg: {0}'.format(len(neg_txts))) # neg样本个数 2000
+# print('num of pos: {0}'.format(len(pos_txts))) # pos样本个数 2000
+# print('num of neg: {0}'.format(len(neg_txts))) # neg样本个数 2000
 
 # # 随机展示5条pos文本
 # pos_samples = random.sample(pos_txts, 5)
@@ -33,7 +43,7 @@ for i in range(len(neg_txts)):
         text = f.read().strip()
         train_texts_orig.append(text)
         f.close()
-print('num of all in list: {0}'.format(len(train_texts_orig))) # list长度 4000
+# print('num of all in list: {0}'.format(len(train_texts_orig))) # list长度 4000
 
 '''
 part-B: 数据预处理-分词
@@ -51,7 +61,7 @@ cn_model = KeyedVectors.load_word2vec_format('res\\word-vector\\sgns.zhihu.bigra
 # 用jieba进行中文分词，最后将每条评论转换为了词索引的列表
 train_tokens = []
 for text in train_texts_orig:
-    # 对每条评论进行去标点符号处理
+    # 分词前去掉标点和特殊符号
     text = re.sub("[\s+\.\!\/_,-|$%^*(+\"\')]+|[+——！，； 。？ 、~@#￥%……&*（）]+", "", text)
     cut = jieba.cut(text)
     cut_list = [i for i in cut]
@@ -76,8 +86,8 @@ print('\npart-C: 数据预处理-索引化')
 num_tokens = [len(tokens) for tokens in train_tokens]
 num_tokens = np.array(num_tokens)
 
-print('max-len of train_tokens: {0}'.format(np.max(num_tokens)))  # 最长评价的长度 1438
-print('mean-len of train_tokens: {0}'.format(np.mean(num_tokens)))  # 平均评论的长度 68.77625
+# print('max-len of train_tokens: {0}'.format(np.max(num_tokens)))  # 最长评价的长度 1438
+# print('mean-len of train_tokens: {0}'.format(np.mean(num_tokens)))  # 平均评论的长度 68.77625
 
 # # 绘制评论长度直方图
 # plt.hist(np.log(num_tokens), bins = 100)
@@ -90,15 +100,15 @@ print('mean-len of train_tokens: {0}'.format(np.mean(num_tokens)))  # 平均评�
 mid_tokens = np.mean(num_tokens) + 2 * np.std(num_tokens)
 mid_tokens = int(mid_tokens)
 rate = np.sum( num_tokens < mid_tokens ) / len(num_tokens)
-print('selected mid-len of train_tokens: {0}'.format(mid_tokens)) # 选取一个平均值，尽可能多的覆盖 227
-print('cover rate: {0}'.format(rate)) # 覆盖率 0.956
+# print('selected mid-len of train_tokens: {0}'.format(mid_tokens)) # 选取一个平均值，尽可能多的覆盖
+# print('cover rate: {0}'.format(rate)) # 覆盖率
 
 '''
 part-D: 数据预处理-重新构建词向量
 '''
 print('\npart-D: 数据预处理-重新构建词向量')
 
-print('num of vector: {0}'.format(len(cut_list))) # 预训练的词向量词汇数 255362
+# print('num of vector: {0}'.format(len(cut_list))) # 预训练的词向量词汇数
 
 # 为了节省训练时间，抽取前50000个词构建新的词向量
 num_words = 50000 
@@ -135,7 +145,7 @@ train_pad[33] # padding之后前面的tokens全变成0，文本在最后面
 
 # 准备实际输出结果向量向量，前2000好评的样本设为1，后2000差评样本设为0
 train_target = np.concatenate((np.ones(2000),np.zeros(2000)))
-print(train_target.shape) # (4000,)
+# print(train_target.shape) # (4000,)
 
 '''
 part-F: 训练
@@ -147,7 +157,7 @@ from keras.optimizers import *
 print('\npart-F: 训练')
 
 # 90%的样本用来训练，剩余10%用来测试
-X_train, X_test, y_train, y_test = train_test_split(train_pad, train_target, test_size=0.1, random_state=12)
+X_train, X_test, y_train, y_test = train_test_split(train_pad, train_target, test_size=my_test_size, random_state=12)
 
 # # 查看训练样本
 # # 用索引反向生成语句，索引为零的标记为空格字符
@@ -162,31 +172,23 @@ X_train, X_test, y_train, y_test = train_test_split(train_pad, train_target, tes
 # print(reverse_tokens(X_train[66]))
 # print('pred: ',y_train[66])
 
-# 用keras构建顺序模型
+# 搭建神经网络
 model = Sequential()
 
-# 模型第一层为embedding
 model.add(Embedding(num_words, embedding_dim, weights=[embedding_matrix], input_length=mid_tokens, trainable=False))
-
-# 循环层使用两层LSTM长短期记忆网络，其中第一层为双向的
-model.add(Bidirectional(LSTM(units=32, return_sequences=True)))
-model.add(LSTM(units=16, return_sequences=False))
-
-# 定义全连接层，激活函数使用sigmoid
+model.add(Bidirectional(LSTM(units=32, dropout=0.2, return_sequences=True)))
+model.add(LSTM(units=16, dropout=0.2, return_sequences=False))
 model.add(Dense(1, activation='sigmoid'))
 
-# 梯度 下降使用adam算法，学习率设为0.01
-optimizer = Adam(lr=1e-3)
+model.compile(loss=my_loss, optimizer=Adam(lr=my_lr), metrics=['accuracy'])
 
-# 定义反向传播，使用交叉熵损失函数，评估函数使用平均值
-model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
-# 查看模型的结构，一共90k左右可训练的变量
-model.summary()
+# # 查看模型的结构
+# model.summary()
 
 '''
 part-G: 调试
 '''
+from keras.utils import plot_model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
 print('\npart-G: 调试')
 
@@ -194,11 +196,11 @@ print('\npart-G: 调试')
 path_checkpoint = 'tmp\\weights.hdf5'
 checkpointer = ModelCheckpoint(filepath=path_checkpoint, monitor='val_loss' , verbose=1 , save_weights_only=True , save_best_only=True)
 
-# 尝试加载已训练模型
-try:
-    model.load_weights(path_checkpoint)
-except Exception as e:
-    print(e)
+# # 尝试加载已训练模型
+# try:
+#     model.load_weights(path_checkpoint)
+# except Exception as e:
+#     print(e)
 
 # 定义early stoping如果3个epoch内validation loss没有改善则停止训练
 earlystopping = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
@@ -210,8 +212,35 @@ lr_reduction = ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_lr=1e-5, pa
 callbacks = [earlystopping, checkpointer, lr_reduction]
 
 # 开始训练
-model.fit(X_train, y_train, validation_split=0.1, epochs=20, batch_size=128, callbacks=callbacks)
+history = model.fit(X_train, y_train, validation_split=my_validation_split, epochs=my_epochs, batch_size=my_batch_size, callbacks=callbacks)
 
-# 显示准确率
-result = model.evaluate(X_test, y_test)
-print('Accuracy:{0:.2%}'.format(result[1]))
+# 模型可视化-历史
+plt.figure(figsize=(11, 4))
+
+plt.figure(1)
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Training', 'validation'])
+
+plt.figure(1)
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Training', 'validation'])
+
+plt.show()
+
+# 模型可视化-RNN
+plot_model(model, show_shapes=True, show_layer_names=True, to_file='tmp\\model.png')
+
+# 模型评估-准确率
+result = model.evaluate(X_test, y_test, verbose=0)
+print('Loss: {0:.4}'.format(result[0]))
+print('Accuracy: {0:.4%}'.format(result[1]))
