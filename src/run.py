@@ -124,7 +124,7 @@ embedding_matrix = embedding_matrix.astype('float32')
 # # 检查新构建的词向量与预训练的词向量index是否对应
 # print(cn_model[cn_model.index_to_key[10]])
 # print(embedding_matrix[10])
-# np.sum(cn_model[cn_model.index_to_key[10]] == embedding_matrix[222] ) # 300
+# np.sum(cn_model[cn_model.index_to_key[10]] == embedding_matrix[10] ) # 300
 
 # 新建词向量的维度，keras会用到
 embedding_matrix.shape # (50000, 300)
@@ -135,17 +135,14 @@ part-E: 数据预处理-填充与裁剪
 from keras.preprocessing.sequence import pad_sequences
 print('\npart-E: 数据预处理-填充与裁剪')
 
-# 输入的train_tokens是一个list，返回的train_pad是一个numpy array，采用前面（pre）填充的方式
+# 输入的train_tokens是一个list，返回的train_pad是一个numpy array，采用pre填充的方式
 train_pad = pad_sequences(train_tokens, maxlen=mid_tokens, padding='pre', truncating='pre')
 
 # 超出五万个词向量的词用0代替
 train_pad[train_pad>=num_words] = 0
 
-train_pad[33] # padding之后前面的tokens全变成0，文本在最后面
-
 # 准备实际输出结果向量向量，前2000好评的样本设为1，后2000差评样本设为0
 train_target = np.concatenate((np.ones(2000),np.zeros(2000)))
-# print(train_target.shape) # (4000,)
 
 '''
 part-F: 训练
@@ -156,7 +153,7 @@ from keras.layers import *
 from keras.optimizers import *
 print('\npart-F: 训练')
 
-# 90%的样本用来训练，剩余10%用来测试
+# 用sklearn分割训练集、测试集
 X_train, X_test, y_train, y_test = train_test_split(train_pad, train_target, test_size=my_test_size, random_state=12)
 
 # # 查看训练样本
