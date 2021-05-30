@@ -2,6 +2,7 @@
 part-A: 数据探索
 '''
 import os
+import random
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 print('\npart-A: 数据探索')
 
@@ -11,6 +12,14 @@ neg_txts = os.listdir('res\\datanew\\neg')
 
 print('num of pos: {0}'.format(len(pos_txts))) # pos样本个数 2000
 print('num of neg: {0}'.format(len(neg_txts))) # neg样本个数 2000
+
+# # 随机展示5条pos文本
+# pos_samples = random.sample(pos_txts, 5)
+# for item in pos_samples:
+#     with open(os.path.join('res\\datanew\\pos', item), 'r', encoding='utf-8') as f:
+#         s = f.read()
+#         print(item)
+#         print(s)
 
 # 将所有的评论内容放置到一个list里，列表中的每个元素是一条评论
 train_texts_orig = [] 
