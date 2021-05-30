@@ -1,19 +1,38 @@
+import os
+import random
+import re
+import jieba
+import warnings
+from gensim.models import KeyedVectors
+import matplotlib.pyplot as plt
+import numpy as np
+from keras.preprocessing.sequence import pad_sequences
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import *
+from keras.optimizers import *
+from keras.utils import plot_model
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
+
 '''
 part-0: 调整超参数
 '''
-my_loss = 'binary_crossentropy'
-my_lr = 1e-3
+my_lr = 1e-2
 my_test_size = 0.1
 my_validation_split = 0.1
-my_epochs = 20
+my_epochs = 40
 my_batch_size = 128
+my_dropout = 0.2
+
+my_optimizer = Nadam(lr=my_lr)
+my_loss = 'binary_crossentropy'
 
 '''
 part-A: 数据探索
 '''
-import os
-import random
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 print('\npart-A: 数据探索')
 
 # 将已经分类好的每条评论的路径放进列表
@@ -48,11 +67,6 @@ for i in range(len(neg_txts)):
 '''
 part-B: 数据预处理-分词
 '''
-import re
-import jieba
-import warnings
-warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
-from gensim.models import KeyedVectors
 print('\npart-B: 数据预处理-分词')
 
 # 使用gensim加载已经训练好的汉语词向量
@@ -78,8 +92,6 @@ print('num of train_tokens: {0}'.format(len(train_tokens))) # 4000
 '''
 part-C: 数据预处理-索引化
 '''
-import matplotlib.pyplot as plt
-import numpy as np
 print('\npart-C: 数据预处理-索引化')
 
 # 获得每条评论的长度，即分词后词语的个数，并将列表转换为ndarray格式
@@ -132,7 +144,6 @@ embedding_matrix.shape # (50000, 300)
 '''
 part-E: 数据预处理-填充与裁剪
 '''
-from keras.preprocessing.sequence import pad_sequences
 print('\npart-E: 数据预处理-填充与裁剪')
 
 # 输入的train_tokens是一个list，返回的train_pad是一个numpy array，采用pre填充的方式
@@ -147,10 +158,6 @@ train_target = np.concatenate((np.ones(2000),np.zeros(2000)))
 '''
 part-F: 训练
 '''
-from sklearn.model_selection import train_test_split
-from keras.models import Sequential
-from keras.layers import *
-from keras.optimizers import *
 print('\npart-F: 训练')
 
 # 用sklearn分割训练集、测试集
@@ -173,11 +180,11 @@ X_train, X_test, y_train, y_test = train_test_split(train_pad, train_target, tes
 model = Sequential()
 
 model.add(Embedding(num_words, embedding_dim, weights=[embedding_matrix], input_length=mid_tokens, trainable=False))
-model.add(Bidirectional(LSTM(units=32, dropout=0.2, return_sequences=True)))
-model.add(LSTM(units=16, dropout=0.2, return_sequences=False))
+model.add(Bidirectional(LSTM(units=32, dropout=my_dropout, return_sequences=True)))
+model.add(LSTM(units=16, dropout=my_dropout, return_sequences=False))
 model.add(Dense(1, activation='sigmoid'))
 
-model.compile(loss=my_loss, optimizer=Adam(lr=my_lr), metrics=['accuracy'])
+model.compile(loss=my_loss, optimizer=my_optimizer, metrics=['accuracy'])
 
 # # 查看模型的结构
 # model.summary()
@@ -185,8 +192,6 @@ model.compile(loss=my_loss, optimizer=Adam(lr=my_lr), metrics=['accuracy'])
 '''
 part-G: 调试
 '''
-from keras.utils import plot_model
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau
 print('\npart-G: 调试')
 
 # 建立一个权重的存储点，保存训练中的最好模型
