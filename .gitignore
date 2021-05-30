@@ -1,4 +1,3 @@
 *.bz2
 *.ipynb
 *.hdf5
-/test/*
