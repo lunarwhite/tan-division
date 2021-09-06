@@ -1,5 +1,6 @@
-﻿# Chinese-corpus-sentiment-data-analysis
-
+# Chinese-corpus-sentiment-data-analysis
+ 
+![Chinese-corpus-sentiment-data-analysis](https://socialify.git.ci/lunarwhite/Chinese-corpus-sentiment-data-analysis/image?description=1&descriptionEditable=ML-based%20sentiment-analysis%20of%20simple%20Chinese%20corpus.%20Pick%20models%20RNN%2C%20LSTM%20and%20Bi-LSTM.%20Use%20%0A%20Keras%20and%20Tensorflow.&font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2Fa%2Fae%2FKeras_logo.svg%2F180px-Keras_logo.svg.png&owner=1&pattern=Overlapping%20Hexagons&pulls=1&stargazers=1&theme=Light)
 
 ```
 ├───.gitignore 
