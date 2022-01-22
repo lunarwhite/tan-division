@@ -19,7 +19,7 @@ h5py==3.1.0
 idna==2.10
 importlib-metadata==4.2.0
 ipykernel==4.6.1
-ipython==6.1.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.10.2
 jieba==0.42.1
