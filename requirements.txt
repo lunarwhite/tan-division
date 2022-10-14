@@ -23,7 +23,7 @@ ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.10.2
 jieba==0.42.1
-joblib==1.0.1
+joblib==1.2.0
 jupyter-client==5.1.0
 jupyter-core==4.3.0
 Keras==2.3.1
