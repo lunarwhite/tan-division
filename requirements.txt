@@ -2,7 +2,7 @@
 astor==0.8.1
 cached-property==1.5.2
 cachetools==4.2.2
-certifi==2020.12.5
+certifi==2022.12.7
 chardet==4.0.0
 colorama==0.3.9
 cycler==0.10.0
