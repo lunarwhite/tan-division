@@ -42,7 +42,7 @@ prompt-toolkit==1.0.15
 protobuf==3.18.3
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-Pygments==2.7.4
+Pygments==2.15.0
 pyparsing==2.4.7
 python-dateutil==2.6.1
 PyYAML==5.4.1
