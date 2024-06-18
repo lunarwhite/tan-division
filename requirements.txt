@@ -63,7 +63,7 @@ threadpoolctl==2.1.0
 tornado==6.4.1
 traitlets==4.3.2
 typing-extensions==3.10.0.0
-urllib3==1.26.18
+urllib3==1.26.19
 wcwidth==0.1.7
 Werkzeug==3.0.3
 wincertstore==0.2
