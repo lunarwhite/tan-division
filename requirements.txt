@@ -68,4 +68,4 @@ wcwidth==0.1.7
 Werkzeug==3.0.3
 wincertstore==0.2
 wrapt==1.12.1
-zipp==3.4.1
+zipp==3.19.1
